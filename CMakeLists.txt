@@ -9,7 +9,10 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(PCL REQUIRED)
 find_package(CUDA)
 find_package(Eigen3 REQUIRED)
-
+find_package(Boost REQUIRED COMPONENTS
+# regex
+filesystem   # 我的工程中只使用了 boost 的 filesystem 功能,因此这里只有一个组件
+)
 if (CUDA_FOUND)
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "")
 
@@ -27,7 +30,7 @@ if (CUDA_FOUND)
 	if("${CUDA_CAPABILITY_VERSION}" MATCHES "^[1-9][0-9]+$")
 	  set(CUDA_ARCH "sm_${CUDA_CAPABILITY_VERSION}")
 	else()
-	  set(CUDA_ARCH "sm_52")
+	  set(CUDA_ARCH "sm_72")
 	endif()
 	
 	set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-arch=${CUDA_ARCH};-std=c++11;--ptxas-options=-v)
@@ -47,6 +50,7 @@ if (CUDA_FOUND)
     ${PCL_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     ${CUDA_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
   )
 
@@ -91,6 +95,7 @@ if (CUDA_FOUND)
 		${LIB_NAME}
 		#${catkin_LIBRARIES} 
   		${PCL_LIBRARIES} 
+		${Boost_LIBRARIES}
 	)
 else()
 	message("fast_pcl ndt_gpu requires CUDA")

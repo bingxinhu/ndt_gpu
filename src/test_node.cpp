@@ -54,36 +54,8 @@ int main(int argc, char** argv)
   approximate_voxel_filter.setLeafSize (0.2, 0.2, 0.2);
   approximate_voxel_filter.setInputCloud (input_cloud);
   approximate_voxel_filter.filter (*filtered_cloud);
-  std::cout << "Filtered cloud contains " << filtered_cloud->size ()
-            << " data points from room_scan2.pcd" << std::endl;
+  std::cout << "Filtered cloud contains " << filtered_cloud->size () << " data points from room_scan2.pcd" << std::endl;
 
-  // Initializing Normal Distributions Transform (NDT).
-  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
-  //gpu::GNormalDistributionsTransform ndt;
-
-  // Setting scale dependent NDT parameters
-  // Setting minimum transformation difference for termination condition.
-  ndt.setTransformationEpsilon (0.01);
-  // Setting maximum step size for More-Thuente line search.
-  ndt.setStepSize (0.1);
-  //Setting Resolution of NDT grid structure (VoxelGridCovariance).
-  ndt.setResolution (1.0);
-
-  // Setting max number of registration iterations.
-  ndt.setMaximumIterations (35);
-
-  // Setting point cloud to be aligned.
-  ndt.setInputSource (filtered_cloud);
-  // Setting point cloud to be aligned to.
-  ndt.setInputTarget (target_cloud);
-
-  // std::shared_ptr<gpu::GNormalDistributionsTransform> new_gpu_ndt_ptr = std::make_shared<gpu::GNormalDistributionsTransform>();
-  // new_gpu_ndt_ptr->setResolution(1.0);
-  // new_gpu_ndt_ptr->setInputTarget(target_cloud);
-  // new_gpu_ndt_ptr->setMaximumIterations(35);
-  // new_gpu_ndt_ptr->setStepSize(0.1);
-  // new_gpu_ndt_ptr->setTransformationEpsilon(0.01);
-  // new_gpu_ndt_ptr->setInputSource(filtered_cloud);
 
   gpu::GNormalDistributionsTransform g_ndt;
 
@@ -94,7 +66,6 @@ int main(int argc, char** argv)
   g_ndt.setStepSize (0.1);
   //Setting Resolution of NDT grid structure (VoxelGridCovariance).
   g_ndt.setResolution (1.0);
-
   // Setting max number of registration iterations.
   g_ndt.setMaximumIterations (35);
 
@@ -117,30 +88,18 @@ int main(int argc, char** argv)
   double fitness_score = -1;
 
   if(use_gpu){
-    // new_gpu_ndt_ptr->align(init_guess);
-    // final_trans = new_gpu_ndt_ptr->getFinalTransformation();
-    // converged = new_gpu_ndt_ptr->hasConverged();
-    // fitness_score = new_gpu_ndt_ptr->getFitnessScore();
     g_ndt.align(init_guess);
     final_trans = g_ndt.getFinalTransformation();
     //final_trans = init_guess;
     converged = g_ndt.hasConverged();
     fitness_score = g_ndt.getFitnessScore();
-
-  }
-  else{
-    ndt.align (*output_cloud, init_guess);
-    final_trans = ndt.getFinalTransformation ();
-    converged = ndt.hasConverged();
-    fitness_score = ndt.getFitnessScore();
   }
 
   clock_t finish = clock();
   double duration = (double)(finish - start) / CLOCKS_PER_SEC;
   std::cout << "Time cost:" << duration << std::endl;
 
-  std::cout << "Normal Distributions Transform has converged:" << converged
-            << " score: " << fitness_score << std::endl;
+  std::cout << "Normal Distributions Transform has converged:" << converged  << " score: " << fitness_score << std::endl;
 
   // Transforming unfiltered, input cloud using found transform.
   pcl::transformPointCloud (*input_cloud, *output_cloud, final_trans);
@@ -157,8 +116,7 @@ int main(int argc, char** argv)
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
   target_color (target_cloud, 255, 0, 0);
   viewer_final->addPointCloud<pcl::PointXYZ> (target_cloud, target_color, "target cloud");
-  viewer_final->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                                  1, "target cloud");
+  viewer_final->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud");
 
   // Coloring and visualizing transformed input cloud (green).
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
