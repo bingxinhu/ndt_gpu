@@ -25,10 +25,10 @@ int main(int argc, char** argv)
     return -1;
   }
 
-  bool use_gpu = false;
-  if(argc == 4){
-    use_gpu = true;
-  }
+//  bool use_gpu = false;
+//  if(argc == 4){
+//    use_gpu = true;
+//  }
 
   // Loading first scan of room.
   pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -87,13 +87,13 @@ int main(int argc, char** argv)
   bool converged = false;
   double fitness_score = -1;
 
-  if(use_gpu){
+//  if(use_gpu){
     g_ndt.align(init_guess);
     final_trans = g_ndt.getFinalTransformation();
     //final_trans = init_guess;
     converged = g_ndt.hasConverged();
     fitness_score = g_ndt.getFitnessScore();
-  }
+//  }
 
   clock_t finish = clock();
   double duration = (double)(finish - start) / CLOCKS_PER_SEC;
